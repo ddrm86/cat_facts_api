@@ -1,2 +1,2 @@
-fastapi[standard]
-sqlmodel
+fastapi[standard]>=0.115.0,<0.116.0
+sqlmodel==0.0.22
