@@ -1,4 +1,5 @@
 import uuid
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -42,9 +43,11 @@ app = FastAPI()
 
 CAT_FACT_NOT_FOUND_MSG: str = 'Cat fact not found'
 
-@app.on_event('startup')
-def on_startup():
+@asynccontextmanager
+async def lifespan():
     create_db_and_tables()
+    yield
+    engine.dispose()
 
 @app.post('/cat_facts/', response_model=CatFactPublic)
 def create_cat_fact(cat_fact: CatFactCreate, session: SessionDep) -> CatFact:
