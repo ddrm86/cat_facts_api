@@ -40,6 +40,8 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
 
+CAT_FACT_NOT_FOUND_MSG: str = 'Cat fact not found'
+
 @app.on_event('startup')
 def on_startup():
     create_db_and_tables()
@@ -61,14 +63,14 @@ def read_cat_facts(session: SessionDep):
 def read_cat_fact(cat_fact_id: str, session: SessionDep):
     cat_fact = session.get(CatFact, cat_fact_id)
     if not cat_fact:
-        raise HTTPException(status_code=404, detail='Cat fact not found')
+        raise HTTPException(status_code=404, detail=CAT_FACT_NOT_FOUND_MSG)
     return cat_fact
 
 @app.patch('/cat_facts/{cat_fact_id}', response_model=CatFactPublic)
 def update_cat_fact(cat_fact_id: str, cat_fact: CatFactUpdate, session: SessionDep):
     db_fact = session.get(CatFact, cat_fact_id)
     if not db_fact:
-        raise HTTPException(status_code=404, detail='Cat fact not found')
+        raise HTTPException(status_code=404, detail=CAT_FACT_NOT_FOUND_MSG)
     cat_fact_data = cat_fact.model_dump(exclude_unset=True)
     db_fact.sqlmodel_update(cat_fact_data)
     session.add(db_fact)
@@ -80,7 +82,7 @@ def update_cat_fact(cat_fact_id: str, cat_fact: CatFactUpdate, session: SessionD
 def delete_cat_fact(cat_fact_id: str, session: SessionDep):
     cat_fact = session.get(CatFact, cat_fact_id)
     if not cat_fact:
-        raise HTTPException(status_code=404, detail='Cat fact not found')
+        raise HTTPException(status_code=404, detail=CAT_FACT_NOT_FOUND_MSG)
     session.delete(cat_fact)
     session.commit()
     return {'ok': True}
